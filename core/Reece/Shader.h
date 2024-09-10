@@ -11,8 +11,10 @@
 #include <iostream>
 #include <stdio.h>
 #include <math.h>
-#include <C:\Users\reece.enthoven\gpr200-fa2024-template\core\ew\external/glad.h>
-#include <C:\Users\reece.enthoven\gpr200-fa2024-template\core\ew\ewMath/ewMath.h>
+#include "../ew/external/glad.h"
+#include "../ew/ewMath/ewMath.h"
+#include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
 using namespace std;
 
 
@@ -26,6 +28,7 @@ public:
     void setBool(const string &name, bool value) const;
     void setInt(const string &name, int value) const;
     void setFloat(const string &name, float value) const;
+    void checkCompileErrors(unsigned int shader, string type);
 };
 
 

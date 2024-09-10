@@ -29,7 +29,7 @@ int main() {
 		return 1;
 	}
 	//Initialization goes here!
-	Shader myShader("Shaders/shader.vs", "Shaders/shader.fs");
+	Shader myShader("assets/Shaders/shader.vs", "assets/Shaders/shader.fs");
 
 	//set up verticies
 	float vertices[] = {
