@@ -8,6 +8,7 @@
 #include <glm/glm.hpp>
 
 #include "Reece/Shader.h"
+using namespace Reece;
 
 const int SCREEN_WIDTH = 1080;
 const int SCREEN_HEIGHT = 720;
@@ -68,8 +69,8 @@ int main() {
 		//Drawing happens here!
 
 		myShader.use();
-		double  timeValue = glfwGetTime();
-		float greenValue = static_cast<float>(sin(timeValue) / 2.0 + 0.5);
+		double timeValue = glfwGetTime();
+		myShader.setFloat("uTime", timeValue);
 
 		//draw triangle
 		glBindVertexArray(VAO);

@@ -3,9 +3,10 @@
 //
 
 #include "Shader.h"
-
-Shader::Shader(const char* vertexPath, const char* fragmentPath)
+namespace Reece
 {
+    Shader::Shader(const char* vertexPath, const char* fragmentPath)
+    {
     string vertexCode;
     string fragmentCode;
     ifstream vShaderFile;
@@ -106,3 +107,5 @@ void Shader::checkCompileErrors(unsigned int shader, string type)
         }
     }
 }
+}
+

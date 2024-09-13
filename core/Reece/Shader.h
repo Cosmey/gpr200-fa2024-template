@@ -17,19 +17,23 @@
 #include <glm/glm.hpp>
 using namespace std;
 
+namespace Reece
+{
+    class Shader {
+    public:
+        unsigned int ID;
 
-class Shader {
-public:
-    unsigned int ID;
+        Shader(const char* vertexPath, const char* fragmentPath);
 
-    Shader(const char* vertexPath, const char* fragmentPath);
+        void use();
+        void setBool(const string &name, bool value) const;
+        void setInt(const string &name, int value) const;
+        void setFloat(const string &name, float value) const;
+        void checkCompileErrors(unsigned int shader, string type);
 
-    void use();
-    void setBool(const string &name, bool value) const;
-    void setInt(const string &name, int value) const;
-    void setFloat(const string &name, float value) const;
-    void checkCompileErrors(unsigned int shader, string type);
-};
+    };
+}
+
 
 
 
