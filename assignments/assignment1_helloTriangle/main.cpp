@@ -30,7 +30,7 @@ int main() {
 		return 1;
 	}
 	//Initialization goes here!
-	Shader myShader("assets/Shaders/shader.vs", "assets/Shaders/shader.fs");
+	Shader myShader("assets/Shaders/Assignment1VertexShader.vs", "assets/Shaders/Assignment1FragmentShader.fs");
 
 	//set up verticies
 	float vertices[] = {
