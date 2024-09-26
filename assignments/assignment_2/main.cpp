@@ -10,6 +10,7 @@
 #include <glm/glm.hpp>
 
 #include "Reece/Shader.h"
+#include "Reece/TextureLoader.h"
 using namespace Reece;
 
 const int SCREEN_WIDTH = 1080;
@@ -32,31 +33,51 @@ int main() {
 		return 1;
 	}
 	//Initialization goes here!
-	Shader myShader("assets/Shaders/Assignment2VertexShader.vs", "assets/Shaders/Assignment2FragmentShader.fs");
+	Shader spriteShader("assets/Shaders/SpriteVS.vs", "assets/Shaders/SpiteFS.fs");
+	Shader backgroundShader("assets/Shaders/BackgroundVS.vs", "assets/Shaders/backgroundFS.fs");
 
-	float vertices[] = {
+	float spriteVertices[] = {
         // positions          // colors           // texture coords
          0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
          0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // bottom right
         -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom left
         -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f  // top left
     };
-    unsigned int indices[] = {
+    unsigned int spriteIndices[] = {
         0, 1, 3, // first triangle
         1, 2, 3  // second triangle
     };
-    unsigned int VBO, VAO, EBO;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
 
-    glBindVertexArray(VAO);
+	float backgroundVertices[] = {
+		// positions          // colors           // texture coords
+		1.0f,   1.0f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
+		1.0f, -1.0f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // bottom right
+	   -1.0f, -1.0f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom left
+	   -1.0f,  1.0f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f  // top left
+   };
+	unsigned int backgroundIndices[] = {
+		0, 1, 3, // first triangle
+		1, 2, 3  // second triangle
+	};
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	//enable blending
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+	//sprite
+    unsigned int VBO1, VAO1, EBO1;
+    glGenVertexArrays(1, &VAO1);
+    glGenBuffers(1, &VBO1);
+    glGenBuffers(1, &EBO1);
+
+    glBindVertexArray(VAO1);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO1);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(spriteVertices), spriteVertices, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO1);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(spriteIndices), spriteIndices, GL_STATIC_DRAW);
 
     // position attribute
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
@@ -69,30 +90,34 @@ int main() {
     glEnableVertexAttribArray(2);
 
 
-    // load and create a texture
-    // -------------------------
-    unsigned int texture;
-    glGenTextures(1, &texture);
-	glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
-	stbi_set_flip_vertically_on_load(true);
-    // set the texture wrapping parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);	// set texture wrapping to GL_REPEAT (default wrapping method)
-    // set texture filtering parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    // load image, create texture and generate mipmaps
-    int width, height, nrChannels;
-    // The FileSystem::getPath(...) is part of the GitHub repository so we can find files on any IDE/platform; replace it with your own image path.
-    unsigned char *data = stbi_load(("assets/Textures/Potion.png"), &width, &height, &nrChannels, 0);
-    if (data)
-    {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-    }
-    else
-    {
-        std::cout << "Failed to load texture" << std::endl;
-    }
-    stbi_image_free(data);
+	//background
+	unsigned int VBO2, VAO2, EBO2;
+	glGenVertexArrays(1, &VAO2);
+	glGenBuffers(1, &VBO2);
+	glGenBuffers(1, &EBO2);
+
+	glBindVertexArray(VAO2);
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBO2);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(backgroundVertices), backgroundVertices, GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO2);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(backgroundIndices), backgroundIndices, GL_STATIC_DRAW);
+
+	// position attribute
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+	// color attribute
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+	// texture coord attribute
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	glEnableVertexAttribArray(2);
+
+	TextureLoader spriteTexture("assets/Textures/Potion.png",GL_TEXTURE_2D,GL_REPEAT,GL_NEAREST,true);
+	TextureLoader backgroundTexture("assets/Textures/stoneWall.png",GL_TEXTURE_2D,GL_REPEAT,GL_NEAREST,true);
+
+
 
 
 
@@ -105,11 +130,18 @@ int main() {
 		glClear(GL_COLOR_BUFFER_BIT);
 		//Drawing happens here!
 
-		glBindTexture(GL_TEXTURE_2D, texture);
-		myShader.use();
+		spriteShader.use();
 
+		double timeValue = glfwGetTime();
+		spriteShader.setFloat("uTime", timeValue);
 		//draw triangle
-		glBindVertexArray(VAO);
+		glBindVertexArray(VAO1);
+		glDrawElements(GL_TRIANGLES,6,GL_UNSIGNED_INT,0);
+
+		backgroundShader.use();
+		backgroundShader.setFloat("uTime", timeValue);
+
+		glBindVertexArray(VAO2);
 		glDrawElements(GL_TRIANGLES,6,GL_UNSIGNED_INT,0);
 
 		glfwSwapBuffers(window);

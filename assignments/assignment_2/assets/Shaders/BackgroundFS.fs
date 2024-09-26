@@ -6,8 +6,10 @@ in vec2 TexCoord;
 
 // texture sampler
 uniform sampler2D texture1;
+uniform float uTime;
 
 void main()
 {
-	FragColor = texture(texture1, TexCoord);
+	FragColor = texture(texture1, uTime + TexCoord * 10);
+
 }
