@@ -43,10 +43,6 @@ int main() {
         -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom left
         -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f  // top left
     };
-    unsigned int spriteIndices[] = {
-        0, 1, 3, // first triangle
-        1, 2, 3  // second triangle
-    };
 
 	float backgroundVertices[] = {
 		// positions          // colors           // texture coords
@@ -55,9 +51,9 @@ int main() {
 	   -1.0f, -1.0f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom left
 	   -1.0f,  1.0f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f  // top left
    };
-	unsigned int backgroundIndices[] = {
+	unsigned int indices[] = {
 		0, 1, 3, // first triangle
-		1, 2, 3  // second triangle
+		1, 2, 3,  // second triangle
 	};
 
 	//enable blending
@@ -79,8 +75,11 @@ int main() {
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(backgroundVertices), backgroundVertices, GL_STATIC_DRAW);
 
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(spriteVertices), spriteVertices, GL_STATIC_DRAW);
+
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(backgroundIndices), backgroundIndices, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 	// position attribute
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
@@ -93,32 +92,11 @@ int main() {
 	glEnableVertexAttribArray(2);
 
 //sprite
-	unsigned int VBO1, VAO1, EBO1;
-	glGenVertexArrays(1, &VAO1);
-	glGenBuffers(1, &VBO1);
-	glGenBuffers(1, &EBO1);
 
-	glBindVertexArray(VAO1);
-
-	glBindBuffer(GL_ARRAY_BUFFER, VBO1);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(spriteVertices), spriteVertices, GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO1);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(spriteIndices), spriteIndices, GL_STATIC_DRAW);
-
-	// position attribute
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-	// color attribute
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
-	// texture coord attribute
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-	glEnableVertexAttribArray(2);
 
 	TextureLoader spriteTexture("assets/Textures/Potion.png",GL_TEXTURE_2D,GL_REPEAT,GL_NEAREST,true);
-	TextureLoader faceTexture("assets/Textures/awesomeface.png",GL_TEXTURE_2D,GL_REPEAT,GL_NEAREST,true);
-	TextureLoader backgroundTexture("assets/Textures/stoneWall.png",GL_TEXTURE_2D,GL_REPEAT,GL_NEAREST,true);
+	TextureLoader faceTexture("assets/Textures/awesomeface.png",GL_TEXTURE_2D,GL_REPEAT,GL_LINEAR,true);
+	TextureLoader backgroundTexture("assets/Textures/stoneWall.png",GL_TEXTURE_2D,GL_REPEAT,GL_LINEAR,true);
 
 	backgroundShader.use();
 	backgroundShader.setInt("texture1", 0);
@@ -145,7 +123,6 @@ int main() {
 		glDrawElements(GL_TRIANGLES,6,GL_UNSIGNED_INT,0);
 
 		spriteShader.use();
-		glBindVertexArray(VAO1);
 		spriteShader.setFloat("uTime", timeValue);
 		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_2D, spriteTexture.GetTextureID());
