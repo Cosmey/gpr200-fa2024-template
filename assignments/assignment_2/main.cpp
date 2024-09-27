@@ -65,43 +65,21 @@ int main() {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 
-	//sprite
-    unsigned int VBO1, VAO1, EBO1;
-    glGenVertexArrays(1, &VAO1);
-    glGenBuffers(1, &VBO1);
-    glGenBuffers(1, &EBO1);
 
-    glBindVertexArray(VAO1);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO1);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(spriteVertices), spriteVertices, GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO1);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(spriteIndices), spriteIndices, GL_STATIC_DRAW);
-
-    // position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    // color attribute
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-    // texture coord attribute
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-    glEnableVertexAttribArray(2);
 
 
 	//background
-	unsigned int VBO2, VAO2, EBO2;
-	glGenVertexArrays(1, &VAO2);
-	glGenBuffers(1, &VBO2);
-	glGenBuffers(1, &EBO2);
+	unsigned int VBO, VAO, EBO;
+	glGenVertexArrays(1, &VAO);
+	glGenBuffers(1, &VBO);
+	glGenBuffers(1, &EBO);
 
-	glBindVertexArray(VAO2);
+	glBindVertexArray(VAO);
 
-	glBindBuffer(GL_ARRAY_BUFFER, VBO2);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(backgroundVertices), backgroundVertices, GL_STATIC_DRAW);
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO2);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(backgroundIndices), backgroundIndices, GL_STATIC_DRAW);
 
 	// position attribute
@@ -114,13 +92,40 @@ int main() {
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
 	glEnableVertexAttribArray(2);
 
+//sprite
+	unsigned int VBO1, VAO1, EBO1;
+	glGenVertexArrays(1, &VAO1);
+	glGenBuffers(1, &VBO1);
+	glGenBuffers(1, &EBO1);
+
+	glBindVertexArray(VAO1);
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBO1);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(spriteVertices), spriteVertices, GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO1);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(spriteIndices), spriteIndices, GL_STATIC_DRAW);
+
+	// position attribute
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+	// color attribute
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+	// texture coord attribute
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	glEnableVertexAttribArray(2);
+
 	TextureLoader spriteTexture("assets/Textures/Potion.png",GL_TEXTURE_2D,GL_REPEAT,GL_NEAREST,true);
+	TextureLoader faceTexture("assets/Textures/awesomeface.png",GL_TEXTURE_2D,GL_REPEAT,GL_NEAREST,true);
 	TextureLoader backgroundTexture("assets/Textures/stoneWall.png",GL_TEXTURE_2D,GL_REPEAT,GL_NEAREST,true);
 
+	backgroundShader.use();
+	backgroundShader.setInt("texture1", 0);
+	backgroundShader.setInt("texture2", 1);
 
-
-
-
+	spriteShader.use();
+	spriteShader.setInt("texture1", 2);
 
 	//Render loop
 	while (!glfwWindowShouldClose(window)) {
@@ -128,21 +133,25 @@ int main() {
 		//Clear framebuffer
 		glClearColor(0.3f, 0.4f, 0.9f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
+		double timeValue = glfwGetTime();
 		//Drawing happens here!
+		backgroundShader.use();
+		glBindVertexArray(VAO);
+		backgroundShader.setFloat("uTime", timeValue);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, backgroundTexture.GetTextureID());
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, faceTexture.GetTextureID());
+		glDrawElements(GL_TRIANGLES,6,GL_UNSIGNED_INT,0);
 
 		spriteShader.use();
-
-		double timeValue = glfwGetTime();
-		spriteShader.setFloat("uTime", timeValue);
-		//draw triangle
 		glBindVertexArray(VAO1);
+		spriteShader.setFloat("uTime", timeValue);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, spriteTexture.GetTextureID());
 		glDrawElements(GL_TRIANGLES,6,GL_UNSIGNED_INT,0);
 
-		backgroundShader.use();
-		backgroundShader.setFloat("uTime", timeValue);
 
-		glBindVertexArray(VAO2);
-		glDrawElements(GL_TRIANGLES,6,GL_UNSIGNED_INT,0);
 
 		glfwSwapBuffers(window);
 	}

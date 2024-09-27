@@ -12,10 +12,8 @@ namespace Reece
         stbi_set_flip_vertically_on_load(flip);
 
         //setting up texture space
-        unsigned int texture;
-        glGenTextures(1, &texture);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(textureType, texture);
+        glGenTextures(1, &textureID);
+        glBindTexture(GL_TEXTURE_2D, textureID);
 
         //set wrap and filtering modes
         glTexParameteri(textureType, GL_TEXTURE_WRAP_S, wrapMode);

@@ -22,7 +22,9 @@ namespace Reece
     class TextureLoader {
     public:
         TextureLoader(const string& texturePath,GLenum textureType,GLint wrapMode,GLint filterMode,bool flip);
-
+        unsigned int GetTextureID() {return textureID;}
+    private:
+        unsigned int textureID;
     };
 }
 

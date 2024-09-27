@@ -11,8 +11,8 @@ uniform float uTime;
 void main()
 {
 	gl_Position = vec4(aPos, 1.0);
-	//gl_Position.x = (gl_Position.x * cos(uTime)) + (gl_Position.y * -sin(uTime));
-	//gl_Position.y = (gl_Position.x * sin(uTime)) + (gl_Position.y * cos(uTime));
+	gl_Position.x = (gl_Position.x * cos(uTime)) + (gl_Position.y * -sin(uTime));
+	gl_Position.y = (gl_Position.x * sin(uTime)) + (gl_Position.y * cos(uTime));
 	ourColor = aColor;
 	TexCoord = aTexCoord;
 }
