@@ -33,7 +33,7 @@ int main() {
 		return 1;
 	}
 	//Initialization goes here!
-	Shader spriteShader("assets/Shaders/SpriteVS.vs", "assets/Shaders/SpiteFS.fs");
+	Shader spriteShader("assets/Shaders/Cube.vs", "assets/Shaders/Cube.fs");
 	Shader backgroundShader("assets/Shaders/BackgroundVS.vs", "assets/Shaders/backgroundFS.fs");
 
 	float spriteVertices[] = {

@@ -17,7 +17,9 @@ set(CORE_INC_DIR
 
 add_library(core STATIC ${CORE_SRC} ${CORE_INC}
         Reece/TextureLoader.cpp
-        Reece/TextureLoader.h)
+        Reece/TextureLoader.h
+        Reece/Camera.cpp
+        Reece/Camera.h)
 
 find_package(OpenGL REQUIRED)
 

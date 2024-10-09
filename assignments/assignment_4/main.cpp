@@ -13,25 +13,17 @@
 
 #include "Reece/Shader.h"
 #include "Reece/TextureLoader.h"
+#include "Reece/Camera.h"
 using namespace Reece;
 
 const int SCREEN_WIDTH = 1080;
 const int SCREEN_HEIGHT = 720;
 
-
-glm::vec3 cameraPos   = glm::vec3(0.0f, 0.0f, 3.0f);
-glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
-glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f, 0.0f);
-bool firstMouse = true;
-float lastX = SCREEN_WIDTH / 2.0f;
-float lastY = SCREEN_HEIGHT / 2.0f;
-float yaw = -90.0f;
-float pitch = 0.0f;
-float fov = 60.0f;
-
-
-void mouse_callback(GLFWwindow* window, double xpos, double ypos);
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+void GetMousePos(GLFWwindow* window, double xpos, double ypos);
+void GetScrollDelta(GLFWwindow* window, double xoffset, double yoffset);
+void CheckInputs(GLFWwindow *window,Camera *myCamera,float deltaTime);
+glm::vec2 mousePos;
+glm::vec2 scrollDelta;
 
 int main() {
 	printf("Initializing...");
@@ -50,8 +42,12 @@ int main() {
 		return 1;
 	}
 	//Initialization goes here!
-	Shader spriteShader("assets/Shaders/SpriteVS.vs", "assets/Shaders/SpiteFS.fs");
+	Shader spriteShader("assets/Shaders/Cube.vs", "assets/Shaders/Cube.fs");
 
+	//camera setup
+	glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+	glm::vec2 aspectRatio = glm::vec2(SCREEN_WIDTH, SCREEN_HEIGHT);
+	Camera myCamera(cameraPos,0.0f,0.0f,60.0f,aspectRatio);
 
 
 
@@ -125,10 +121,7 @@ int main() {
 		cubeScales[i] = glm::vec3(ew::RandomRange(0.2f,3.0f), ew::RandomRange(0.2f,3.0f), ew::RandomRange(0.2f,3.0f));
 	}
 
-	glm::vec3 cameraTarget = glm::vec3(0.0f,0.0f,0.0f);
-	glm::vec3 cameraDirection = glm::normalize(cameraPos - cameraTarget);
-	glm::vec3 up = glm::vec3(0.0f,1.0f,0.0f);
-	glm::vec3 cameraRight = glm::normalize(glm::cross(up,cameraDirection));
+
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -136,10 +129,6 @@ int main() {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	glm::mat4 model = glm::mat4(1.0f);
-	model = glm::rotate(model, glm::radians(0.0f), glm::vec3(1.0f,0.0f,0.0f));
-	glm::mat4 projection;
-	projection = glm::perspective(glm::radians(45.0f), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f);
 
 
 
@@ -183,8 +172,10 @@ int main() {
 
 	float deltaTime = 0.0f;
 	float previousTime = 0.0f;
-	glfwSetCursorPosCallback(window, mouse_callback);
-	glfwSetScrollCallback(window, scroll_callback);
+
+	GLdouble mouseX,mouseY;
+	glfwSetCursorPosCallback(window, GetMousePos);
+	glfwSetScrollCallback(window, GetScrollDelta);
 	//Render loop
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
@@ -198,44 +189,18 @@ int main() {
 
 		spriteShader.use();
 		spriteShader.setFloat("uTime", timeValue);
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, spriteTexture.GetTextureID());
 
-
-		glfwSetCursorPosCallback(window,mouse_callback);
-
-
-
-		float cameraSpeed = 5.0f; // adjust accordingly
-		if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
-			cameraSpeed *= 2;
-		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-			cameraPos += cameraSpeed * cameraFront * deltaTime;
-		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-			cameraPos -= cameraSpeed * cameraFront * deltaTime;
-		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-			cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed * deltaTime;
-		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-			cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed * deltaTime;
-		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
-			cameraPos += cameraSpeed * cameraUp * deltaTime;
-		if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
-			cameraPos -= cameraSpeed * cameraUp * deltaTime;
-
-
-
-
-		const float radius = 10.0f;
-		float camX = sin(glfwGetTime()) * radius;
-		float camZ = cos(glfwGetTime()) * radius;
+		myCamera.UpdateMousePosition(mousePos);
+		myCamera.UpdateScroll(scrollDelta);
+		scrollDelta = glm::vec2(0.0f);
+		CheckInputs(window,&myCamera,deltaTime);
 		glm::mat4 view;
-		view = glm::lookAt(cameraPos,cameraPos + cameraFront,cameraUp);
+		view = myCamera.View();
 
 		spriteShader.setMat4("view", view);
-		glm::mat4 projection = glm::perspective(glm::radians(fov), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f);
+		glm::mat4 projection = myCamera.Projection();
 		spriteShader.setMat4("projection", projection);
 
-		cout << deltaTime << endl;
 		for(int i = 0;i < 20;i++)
 		{
 			glm::mat4 model = glm::mat4(1.0f);
@@ -243,9 +208,10 @@ int main() {
 			model = glm::rotate(model, glm::radians(180.0f), cubeRotations[i] += glm::vec3(deltaTime,deltaTime,0));
 			model = glm::scale(model, cubeScales[i]);
 			spriteShader.setMat4("model",model);
+			glActiveTexture(GL_TEXTURE2);
+			glBindTexture(GL_TEXTURE_2D, spriteTexture.GetTextureID());
 			glDrawElements(GL_TRIANGLES,36,GL_UNSIGNED_INT,0);
 		}
-
 
 
 		glfwSwapBuffers(window);
@@ -254,44 +220,30 @@ int main() {
 	}
 	printf("Shutting down...");
 }
-
-void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+void GetMousePos(GLFWwindow *window, double xpos, double ypos)
 {
-	if (firstMouse)
-	{
-		lastX = xpos;
-		lastY = ypos;
-		firstMouse = false;
-	}
-
-	float xoffset = xpos - lastX;
-	float yoffset = lastY - ypos;
-	lastX = xpos;
-	lastY = ypos;
-
-	float sensitivity = 0.1f;
-	xoffset *= sensitivity;
-	yoffset *= sensitivity;
-
-	yaw   += xoffset;
-	pitch += yoffset;
-
-	if(pitch > 89.0f)
-		pitch = 89.0f;
-	if(pitch < -89.0f)
-		pitch = -89.0f;
-
-	glm::vec3 direction;
-	direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-	direction.y = sin(glm::radians(pitch));
-	direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-	cameraFront = glm::normalize(direction);
+	mousePos = glm::vec2(xpos,ypos);
 }
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+void GetScrollDelta(GLFWwindow* window, double xoffset, double yoffset)
 {
-	fov -= (float)yoffset;
-	if (fov < 1.0f)
-		fov = 1.0f;
-	if (fov > 120.0f)
-		fov = 120.0f;
+	scrollDelta = glm::vec2(xoffset,yoffset);
 }
+void CheckInputs(GLFWwindow *window,Camera *myCamera,float deltaTime)
+{
+	float cameraSpeed = 5.0f; // adjust accordingly
+	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+		cameraSpeed *= 2;
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+		myCamera->position += cameraSpeed * myCamera->Front() * deltaTime;
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+		myCamera->position -= cameraSpeed * myCamera->Front() * deltaTime;
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+		myCamera->position -= glm::normalize(glm::cross(myCamera->Front(), myCamera->Up())) * cameraSpeed * deltaTime;
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+		myCamera->position += glm::normalize(glm::cross(myCamera->Front(), myCamera->Up())) * cameraSpeed * deltaTime;
+	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+		myCamera->position -= cameraSpeed * glm::normalize(glm::cross(myCamera->Front(), glm::normalize(glm::cross(myCamera->Front(), myCamera->Up())))) * deltaTime;
+	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+		myCamera->position += cameraSpeed * glm::normalize(glm::cross(myCamera->Front(), glm::normalize(glm::cross(myCamera->Front(), myCamera->Up())))) * deltaTime;
+}
+
