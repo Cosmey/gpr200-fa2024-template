@@ -15,6 +15,7 @@
 #include "../ew/ewMath/ewMath.h"
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 using namespace std;
 
 namespace Reece
@@ -29,6 +30,7 @@ namespace Reece
         void setBool(const string &name, bool value) const;
         void setInt(const string &name, int value) const;
         void setFloat(const string &name, float value) const;
+        void setMat4(const string &name, const glm::mat4 &m);
         void checkCompileErrors(unsigned int shader, string type);
 
     };
