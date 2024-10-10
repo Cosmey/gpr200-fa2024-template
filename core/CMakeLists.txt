@@ -19,7 +19,12 @@ add_library(core STATIC ${CORE_SRC} ${CORE_INC}
         Reece/TextureLoader.cpp
         Reece/TextureLoader.h
         Reece/Camera.cpp
-        Reece/Camera.h)
+        Reece/Camera.h
+        Reece/ThreeDObject.cpp
+        Reece/ThreeDObject.h
+        Reece/Cube.cpp
+        Reece/Cube.h
+        Reece/ThreeDObject.cpp)
 
 find_package(OpenGL REQUIRED)
 
