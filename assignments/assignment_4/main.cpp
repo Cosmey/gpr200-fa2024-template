@@ -205,7 +205,7 @@ int main() {
 		{
 			glm::mat4 model = glm::mat4(1.0f);
 			model = glm::translate(model,cubePositions[i]);
-			model = glm::rotate(model, glm::radians(180.0f), cubeRotations[i] += glm::vec3(deltaTime,deltaTime,0));
+			model = glm::rotate(model, glm::radians(timeValue * 100.0f), cubeRotations[i] += glm::vec3(deltaTime,deltaTime,0));
 			model = glm::scale(model, cubeScales[i]);
 			spriteShader.setMat4("model",model);
 			glActiveTexture(GL_TEXTURE2);
