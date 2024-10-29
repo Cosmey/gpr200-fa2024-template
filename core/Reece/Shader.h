@@ -31,6 +31,7 @@ namespace Reece
         void setInt(const string &name, int value) const;
         void setFloat(const string &name, float value) const;
         void setMat4(const string &name, const glm::mat4 &m);
+        void setVec3(const string &name,const glm::vec3 &v);
         void checkCompileErrors(unsigned int shader, string type);
 
     };
