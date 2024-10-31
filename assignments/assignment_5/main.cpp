@@ -46,10 +46,7 @@ int main() {
 		return 1;
 	}
 	//Initialization goes here!
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGui_ImplGlfw_InitForOpenGL(window,true);
-	ImGui_ImplOpenGL3_Init();
+
 
 	Shader spriteShader("assets/Shaders/Cube.vs", "assets/Shaders/Cube.fs");
 	Shader lightCubeShader("assets/Shaders/Cube.vs", "assets/Shaders/LightCube.fs");
@@ -193,6 +190,10 @@ int main() {
 	GLdouble mouseX,mouseY;
 	glfwSetCursorPosCallback(window, GetMousePos);
 	glfwSetScrollCallback(window, GetScrollDelta);
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGui_ImplGlfw_InitForOpenGL(window,true);
+    ImGui_ImplOpenGL3_Init();
 	//Render loop
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
@@ -275,11 +276,11 @@ int main() {
 		ImGui::NewFrame();
 
 		ImGui::Begin("Settings");
-		ImGui::DragFloat3("Light Position", &lightPosition.x, 1.0f,0.0f,20.0f);
+		ImGui::DragFloat3("Light Position", &lightPosition.x, 0.5f,-20.0f,20.0f);
 		ImGui::ColorEdit3("Light Color",&lightColor.x,1.0f);
-		ImGui::DragFloat("AmbientK",&ambientK,1.0f,0.0f,1.0f);
-		ImGui::DragFloat("DiffuseK",&diffuseK,1.0f,0.0f,1.0f);
-		ImGui::DragFloat("SpecularK",&specularK,1.0f,0.0f,1.0f);
+		ImGui::DragFloat("AmbientK",&ambientK,0.01f,0.0f,1.0f);
+		ImGui::DragFloat("DiffuseK",&diffuseK,0.01f,0.0f,1.0f);
+		ImGui::DragFloat("SpecularK",&specularK,0.01f,0.0f,1.0f);
 		ImGui::DragFloat("Shininess",&shininess,1.0f,2.0f,1024.0f);
 		ImGui::End();
 
