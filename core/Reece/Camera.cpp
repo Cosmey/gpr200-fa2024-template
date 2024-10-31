@@ -20,38 +20,56 @@ namespace Reece {
         lastX = aspectRatio.x / 2.0f;
         lastY = aspectRatio.y / 2.0f;
         firstMouse = true;
-    }
-    void Camera::UpdateMousePosition(glm::vec2 mousePosition)
-    {
-        if (firstMouse)
-        {
-            lastX = mousePosition.x;
-            lastY = mousePosition.y;
-            firstMouse = false;
-        }
-
-        float xoffset = mousePosition.x - lastX;
-        float yoffset = lastY - mousePosition.y;
-        lastX = mousePosition.x;
-        lastY = mousePosition.y;
-
-        float sensitivity = 0.1f;
-        xoffset *= sensitivity;
-        yoffset *= sensitivity;
-
-        yaw   += xoffset;
-        pitch += yoffset;
-
-        if(pitch > 89.0f)
-            pitch = 89.0f;
-        if(pitch < -89.0f)
-            pitch = -89.0f;
+        movingTransition = true;
 
         glm::vec3 direction;
         direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
         direction.y = sin(glm::radians(pitch));
         direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
         front = glm::normalize(direction);
+    }
+    void Camera::UpdateMousePosition(glm::vec2 mousePosition,bool move)
+    {
+
+
+        if(move)
+        {
+            if (movingTransition)
+            {
+                lastX = mousePosition.x;
+                lastY = mousePosition.y;
+                movingTransition = false;
+            }
+            float xoffset = mousePosition.x - lastX;
+            float yoffset = lastY - mousePosition.y;
+
+
+            float sensitivity = 0.1f;
+            xoffset *= sensitivity;
+            yoffset *= sensitivity;
+
+            yaw   += xoffset;
+            pitch += yoffset;
+
+            if(pitch > 89.0f)
+                pitch = 89.0f;
+            if(pitch < -89.0f)
+                pitch = -89.0f;
+
+
+            glm::vec3 direction;
+            direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+            direction.y = sin(glm::radians(pitch));
+            direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+            front = glm::normalize(direction);
+        }
+        else
+        {
+            movingTransition = true;
+        }
+        lastX = mousePosition.x;
+        lastY = mousePosition.y;
+
     }
     void Camera::UpdateScroll(glm::vec2 offSet)
     {

@@ -22,7 +22,7 @@ namespace Reece {
     class Camera {
     public:
         Camera(glm::vec3 position,float yaw,float pitch,float fov,glm::vec2 aspectRatio);
-        void UpdateMousePosition(glm::vec2 mousePosition);
+        void UpdateMousePosition(glm::vec2 mousePosition,bool move);
         void UpdateScroll(glm::vec2 offSet);
         glm::mat4 View();
         glm::mat4 Projection();
@@ -38,6 +38,7 @@ namespace Reece {
         float lastX,lastY;
         float fov;
         bool firstMouse;
+        bool movingTransition;
     };
 
 }

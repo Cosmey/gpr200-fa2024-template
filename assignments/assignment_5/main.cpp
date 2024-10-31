@@ -14,6 +14,10 @@
 #include "Reece/Shader.h"
 #include "Reece/TextureLoader.h"
 #include "Reece/Camera.h"
+
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
 using namespace Reece;
 
 const int SCREEN_WIDTH = 1080;
@@ -42,10 +46,16 @@ int main() {
 		return 1;
 	}
 	//Initialization goes here!
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGui_ImplGlfw_InitForOpenGL(window,true);
+	ImGui_ImplOpenGL3_Init();
+
 	Shader spriteShader("assets/Shaders/Cube.vs", "assets/Shaders/Cube.fs");
+	Shader lightCubeShader("assets/Shaders/Cube.vs", "assets/Shaders/LightCube.fs");
 
 	//camera setup
-	glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+	glm::vec3 cameraPos = glm::vec3(-20.0f, 0.0f, 0.0f);
 	glm::vec2 aspectRatio = glm::vec2(SCREEN_WIDTH, SCREEN_HEIGHT);
 	Camera myCamera(cameraPos,0.0f,0.0f,60.0f,aspectRatio);
 
@@ -55,36 +65,36 @@ int main() {
 
 
 	float vertices[] = {
-		// positions          // colors           // texture coords
-		1.0f,  1.0f,-1.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
-		1.0f, -1.0f,-1.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // bottom right
-	   -1.0f, -1.0f,-1.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom left
-	   -1.0f,  1.0f,-1.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f,  // top left
+		// positions          // normals           // texture coords
+		1.0f,  1.0f,-1.0f,   0.0f, 0.0f,-1.0f,   1.0f, 1.0f, // top right
+		1.0f, -1.0f,-1.0f,   0.0f, 0.0f, -1.0f,   1.0f, 0.0f, // bottom right
+	   -1.0f, -1.0f,-1.0f,   0.0f, 0.0f, -1.0f,   0.0f, 0.0f, // bottom left
+	   -1.0f,  1.0f,-1.0f,   0.0f, 0.0f, -1.0f,   0.0f, 1.0f,  // top left
 
 		1.0f,  1.0f, 1.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
-		1.0f, -1.0f, 1.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // bottom right
-	    1.0f, -1.0f,-1.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom left
-	    1.0f,  1.0f,-1.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f,  // top left
+		1.0f, -1.0f, 1.0f,   1.0f, 0.0f, 0.0f,   1.0f, 0.0f, // bottom right
+	    1.0f, -1.0f,-1.0f,   1.0f, 0.0f, 0.0f,   0.0f, 0.0f, // bottom left
+	    1.0f,  1.0f,-1.0f,   1.0f, 0.0f, 0.0f,   0.0f, 1.0f,  // top left
 
-		1.0f,  1.0f, 1.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
-		1.0f, -1.0f, 1.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // bottom right
+		1.0f,  1.0f, 1.0f,   0.0f, 0.0f, 1.0f,   1.0f, 1.0f, // top right
+		1.0f, -1.0f, 1.0f,   0.0f, 0.0f, 1.0f,   1.0f, 0.0f, // bottom right
 	   -1.0f, -1.0f, 1.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom left
-	   -1.0f,  1.0f, 1.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f,  // top left
+	   -1.0f,  1.0f, 1.0f,   0.0f, 0.0f, 1.0f,   0.0f, 1.0f,  // top left
 
-		-1.0f,  1.0f, 1.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
-		-1.0f, -1.0f, 1.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // bottom right
-		-1.0f, -1.0f,-1.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom left
-		-1.0f,  1.0f,-1.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f,  // top left
+		-1.0f,  1.0f, 1.0f,   -1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
+		-1.0f, -1.0f, 1.0f,   -1.0f, 0.0f, 0.0f,   1.0f, 0.0f, // bottom right
+		-1.0f, -1.0f,-1.0f,   -1.0f, 0.0f, 0.0f,   0.0f, 0.0f, // bottom left
+		-1.0f,  1.0f,-1.0f,   -1.0f, 0.0f, 0.0f,   0.0f, 1.0f,  // top left
 
-		 1.0f,  1.0f, 1.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
+		 1.0f,  1.0f, 1.0f,   0.0f, 1.0f, 0.0f,   1.0f, 1.0f, // top right
 		 1.0f,  1.0f,-1.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // bottom right
-		-1.0f,  1.0f,-1.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom left
-		-1.0f,  1.0f, 1.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f,  // top left
+		-1.0f,  1.0f,-1.0f,   0.0f, 1.0f, 0.0f,   0.0f, 0.0f, // bottom left
+		-1.0f,  1.0f, 1.0f,   0.0f, 1.0f, 0.0f,   0.0f, 1.0f,  // top left
 
-		1.0f,  -1.0f, 1.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
-		 1.0f,  -1.0f,-1.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // bottom right
-		-1.0f,  -1.0f,-1.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom left
-		-1.0f,  -1.0f, 1.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f,  // top left
+		1.0f,  -1.0f, 1.0f,   0.0f, -1.0f, 0.0f,   1.0f, 1.0f, // top right
+		 1.0f,  -1.0f,-1.0f,   0.0f, -1.0f, 0.0f,   1.0f, 0.0f, // bottom right
+		-1.0f,  -1.0f,-1.0f,   0.0f, -1.0f, 0.0f,   0.0f, 0.0f, // bottom left
+		-1.0f,  -1.0f, 1.0f,   0.0f, -1.0f, 0.0f,   0.0f, 1.0f,  // top left
    };
 
 	unsigned int indices[] = {
@@ -109,9 +119,14 @@ int main() {
 	};
 
 
-	glm::vec3 lightPosition = glm::vec3(0.0f, 0.0f, 3.0f);
+	glm::vec3 lightPosition = glm::vec3(0.0f, 0.0f, 0.0f);
 	glm::vec3 lightRotation = glm::vec3(.01f, 0.0f, 0.0f);
 	glm::vec3 lightScale = glm::vec3(1.0f, 1.0f, 1.0f);
+	glm::vec3 lightColor = glm::vec3(1.0f,1.0f,1.0f);
+	float shininess = 100.0f;
+	float ambientK = 0.5f;
+	float diffuseK = 0.5f;
+	float specularK = 0.5f;
 
 	glm::vec3 cubePositions[20];
 	for(int i =0;i < 20;i++) {
@@ -147,21 +162,19 @@ int main() {
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 	// position attribute
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
-	// color attribute
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
 	// texture coord attribute
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
 	glEnableVertexAttribArray(2);
+
+	// normal attribute
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(3);
 
 //sprite
 
@@ -173,7 +186,6 @@ int main() {
 	spriteShader.use();
 	spriteShader.setInt("texture1", 2);
 
-	glfwSetInputMode(window,GLFW_CURSOR,GLFW_CURSOR_DISABLED);
 
 	float deltaTime = 0.0f;
 	float previousTime = 0.0f;
@@ -190,13 +202,27 @@ int main() {
 		float timeValue = glfwGetTime();
 		deltaTime = timeValue - previousTime;
 		//Drawing happens here!
+
+
+
+
+
+
 		glBindVertexArray(VAO);
 
 		spriteShader.use();
 		spriteShader.setFloat("uTime", timeValue);
-		spriteShader.setVec3("lightPos",lightPosition + glm::vec3(1,1,1));
+		spriteShader.setVec3("lightPos",lightPosition);
 
-		myCamera.UpdateMousePosition(mousePos);
+		if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_2) == GLFW_PRESS) {
+			myCamera.UpdateMousePosition(mousePos,true);
+			glfwSetInputMode(window,GLFW_CURSOR,GLFW_CURSOR_DISABLED);
+		}
+		else
+		{
+			myCamera.UpdateMousePosition(mousePos,false);
+			glfwSetInputMode(window,GLFW_CURSOR,GLFW_CURSOR_NORMAL);
+		}
 		myCamera.UpdateScroll(scrollDelta);
 		scrollDelta = glm::vec2(0.0f);
 		CheckInputs(window,&myCamera,deltaTime);
@@ -207,22 +233,36 @@ int main() {
 		glm::mat4 projection = myCamera.Projection();
 		spriteShader.setMat4("projection", projection);
 
+
+		lightCubeShader.use();
+		lightCubeShader.setMat4("view", view);
+		lightCubeShader.setMat4("projection",projection);
+		lightCubeShader.setFloat("uTime", timeValue);
 		//light
-		spriteShader.setVec3("objectColor",glm::vec3(1.0f,1.0f,1.0f));
-		spriteShader.setVec3("lightColor",glm::vec3(1.0f,1.0f,1.0f));
+		lightCubeShader.setVec3("objectColor",glm::vec3(1.0f,1.0f,1.0f));
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::translate(model,lightPosition);
 		//model = glm::rotate(model, glm::radians(0.0f), lightRotation);
 		model = glm::scale(model, lightScale);
-		spriteShader.setMat4("model",model);
+		lightCubeShader.setMat4("model",model);
 		glDrawElements(GL_TRIANGLES,36,GL_UNSIGNED_INT,0);
 
+		spriteShader.use();
+
+		//set all lighting values
+		spriteShader.setVec3("lightColor",lightColor);
+		spriteShader.setVec3("lightPos",lightPosition + glm::vec3(1.0f,1.0f,1.0f));
+		spriteShader.setVec3("viewPos",myCamera.position);
+		spriteShader.setFloat("shininess",shininess);
+		spriteShader.setFloat("ambientK",ambientK);
+		spriteShader.setFloat("diffuseK",diffuseK);
+		spriteShader.setFloat("specularK",specularK);
 		for(int i = 0;i < 20;i++)
 		{
 			spriteShader.setVec3("objectColor",glm::vec3(2.0f,0.5f,0.31f));
 			glm::mat4 model = glm::mat4(1.0f);
 			model = glm::translate(model,cubePositions[i]);
-			model = glm::rotate(model, glm::radians(timeValue * 100.0f), cubeRotations[i] += glm::vec3(deltaTime,deltaTime,0));
+			model = glm::rotate(model, glm::radians(10.0f), cubeRotations[i]);
 			model = glm::scale(model, cubeScales[i]);
 			spriteShader.setMat4("model",model);
 			glActiveTexture(GL_TEXTURE2);
@@ -230,6 +270,21 @@ int main() {
 			glDrawElements(GL_TRIANGLES,36,GL_UNSIGNED_INT,0);
 		}
 
+		ImGui_ImplGlfw_NewFrame();
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui::NewFrame();
+
+		ImGui::Begin("Settings");
+		ImGui::DragFloat3("Light Position", &lightPosition.x, 1.0f,0.0f,20.0f);
+		ImGui::ColorEdit3("Light Color",&lightColor.x,1.0f);
+		ImGui::DragFloat("AmbientK",&ambientK,1.0f,0.0f,1.0f);
+		ImGui::DragFloat("DiffuseK",&diffuseK,1.0f,0.0f,1.0f);
+		ImGui::DragFloat("SpecularK",&specularK,1.0f,0.0f,1.0f);
+		ImGui::DragFloat("Shininess",&shininess,1.0f,2.0f,1024.0f);
+		ImGui::End();
+
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 		glfwSwapBuffers(window);
 
